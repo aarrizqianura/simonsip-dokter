@@ -18,7 +18,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="{ mobileMenuOpen: false, mobilePasswordOpen: false }">
 
     <!-- TOP HEADER / NAVBAR -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
@@ -35,7 +35,7 @@
                 </div>
             </a>
 
-            <!-- Main Navigation Links -->
+            <!-- Desktop Navigation Links (Hidden on Mobile) -->
             <nav class="hidden md:flex space-x-2">
                 <a href="{{ route('dokter.dashboard') }}" 
                    class="px-4 py-2 text-sm font-medium rounded-lg flex items-center space-x-2 transition {{ request()->routeIs('dokter.dashboard', 'portal.dashboard') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
@@ -53,12 +53,12 @@
                 </a>
             </nav>
 
-            <!-- User Profile & Web Notification Bell Dropdown -->
-            <div class="flex items-center space-x-3">
+            <!-- Right Actions: Notification Bell & Hamburger Menu Button -->
+            <div class="flex items-center space-x-2">
                 
-                <!-- Web Notification Dropdown Icon -->
-                <div class="relative" x-data="{ open: false }">
-                    <button type="button" @click="open = !open" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full relative focus:outline-none transition" title="Pemberitahuan Sistem">
+                <!-- Web Notification Bell Dropdown -->
+                <div class="relative" x-data="{ notifOpen: false }">
+                    <button type="button" @click="notifOpen = !notifOpen" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full relative focus:outline-none transition" title="Pemberitahuan Sistem">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9"/></svg>
                         
                         @if(auth()->user()->unreadNotifications->count() > 0)
@@ -68,8 +68,8 @@
                         @endif
                     </button>
 
-                    <!-- Dropdown Content -->
-                    <div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-slate-100 p-4 z-50">
+                    <!-- Dropdown Content Notifikasi -->
+                    <div x-show="notifOpen" x-cloak @click.away="notifOpen = false" class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-slate-100 p-4 z-50">
                         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
                             <h4 class="text-sm font-bold text-slate-800">Pemberitahuan Sistem</h4>
                             <div class="flex items-center gap-2">
@@ -111,40 +111,188 @@
                     </div>
                 </div>
 
-                <!-- Doctor Profile & Logout -->
-                <div class="flex items-center space-x-2 pl-3 border-l border-slate-200">
-                    <div class="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
-                        dr
+                <!-- Hamburger Menu Button (Visible on Mobile Only, Top Right) -->
+                <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg focus:outline-none transition" aria-label="Buka Menu Navigasi">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <!-- Desktop Profile Dropdown (Ubah Kata Sandi & Logout, Hidden on Mobile) -->
+                <div class="hidden md:block relative pl-3 border-l border-slate-200" x-data="{ profileOpen: false, desktopPasswordOpen: false }">
+                    <button type="button" @click="profileOpen = !profileOpen" class="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 transition focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">dr</div>
+                        <span class="text-xs font-semibold text-slate-700">{{ auth()->user()->name }}</span>
+                        <svg class="w-4 h-4 text-slate-400 transition-transform" :class="profileOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Desktop Panel -->
+                    <div x-show="profileOpen" x-cloak @click.away="profileOpen = false" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 space-y-3">
+                        <div class="flex items-center space-x-3 pb-3 border-b border-slate-100">
+                            <div class="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0">dr</div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-800 truncate">{{ auth()->user()->name }}</p>
+                                <span class="text-[10px] text-emerald-600 font-semibold block">ID Login: {{ auth()->user()->username }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Toggle Ubah Kata Sandi (Desktop Dropdown) -->
+                        <div>
+                            <button type="button" @click="desktopPasswordOpen = !desktopPasswordOpen"
+                                    class="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs transition flex items-center justify-between">
+                                <span class="flex items-center space-x-2">
+                                    <span>🔐</span>
+                                    <span>Ubah Kata Sandi</span>
+                                </span>
+                                <span class="text-[10px] text-slate-500" x-text="desktopPasswordOpen ? '▲ Tutup' : '▼ Buka'">▼ Buka</span>
+                            </button>
+
+                            <div x-show="desktopPasswordOpen" x-cloak class="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                <form action="{{ route('profile.password') }}" method="POST" class="space-y-2.5 text-xs">
+                                    @csrf
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Password Saat Ini</label>
+                                        <input type="password" name="current_password" required
+                                               class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Password Baru</label>
+                                        <input type="password" name="new_password" required
+                                               class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Konfirmasi Password Baru</label>
+                                        <input type="password" name="new_password_confirmation" required
+                                               class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    </div>
+                                    <button type="submit" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition">
+                                        Simpan Kata Sandi Baru
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Keluar Aplikasi (Desktop Dropdown) -->
+                        <form action="{{ route('logout') }}" method="POST" class="pt-2 border-t border-slate-100">
+                            @csrf
+                            <button type="submit" class="w-full py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                <span>Keluar Aplikasi</span>
+                            </button>
+                        </form>
                     </div>
-                    <span class="text-xs font-semibold text-slate-700 hidden sm:inline">{{ auth()->user()->name }}</span>
-                    
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="text-slate-400 hover:text-rose-600 p-1" title="Keluar Aplikasi">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        </button>
-                    </form>
                 </div>
+
             </div>
 
         </div>
-
-        <!-- Mobile Navigation Links -->
-        <nav class="flex md:hidden border-t border-slate-100 px-4 py-2 space-x-2 overflow-x-auto bg-slate-50/70">
-            <a href="{{ route('dokter.dashboard') }}" 
-               class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('dokter.dashboard', 'portal.dashboard') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                Dashboard Saya
-            </a>
-            <a href="{{ route('dokter.renewal') }}" 
-               class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('dokter.renewal*', 'portal.renewal.*') ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                Unggah Perpanjangan SIP
-            </a>
-            <a href="{{ route('dokter.riwayat') }}" 
-               class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('dokter.riwayat', 'portal.riwayat') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-100' }}">
-                Riwayat SIP
-            </a>
-        </nav>
     </header>
+
+    <!-- MOBILE SLIDE-OVER MENU (DRAWER) -->
+    <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-50 flex md:hidden" style="display: none;">
+        <!-- Backdrop Gelap -->
+        <div @click="mobileMenuOpen = false"
+             x-show="mobileMenuOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+
+        <!-- Panel Menu Geser dari Kanan -->
+        <div x-show="mobileMenuOpen"
+             x-transition:enter="transition ease-in-out duration-300 transform"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in-out duration-300 transform"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="relative ml-auto w-80 max-w-full bg-white h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+            
+            <div>
+                <!-- Header Drawer -->
+                <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">dr</div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800 line-clamp-1">{{ auth()->user()->name }}</p>
+                            <span class="text-[10px] text-emerald-600 font-semibold">Staf Medis Aktif</span>
+                        </div>
+                    </div>
+                    <button type="button" @click="mobileMenuOpen = false" class="text-slate-400 hover:text-slate-600 p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Navigasi Menu Mobile -->
+                <nav class="space-y-2 text-sm font-medium">
+                    <a href="{{ route('dokter.dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl {{ request()->routeIs('dokter.dashboard', 'portal.dashboard') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <span>🏠 Dashboard Saya</span>
+                    </a>
+                    <a href="{{ route('dokter.renewal') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl {{ request()->routeIs('dokter.renewal*', 'portal.renewal.*') ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <span>📤 Unggah Perpanjangan SIP</span>
+                    </a>
+                    <a href="{{ route('dokter.riwayat') }}" class="flex items-center space-x-3 px-4 py-3 rounded-xl {{ request()->routeIs('dokter.riwayat', 'portal.riwayat') ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <span>📜 Riwayat SIP</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Pengaturan Kata Sandi & Tombol Keluar di Bagian Bawah Drawer -->
+            <div class="pt-4 border-t border-slate-100 space-y-2.5">
+                <!-- Tombol & Form Ubah Kata Sandi (Mobile Drawer) -->
+                <div>
+                    <button type="button" @click="mobilePasswordOpen = !mobilePasswordOpen"
+                            class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs transition flex items-center justify-between">
+                        <span class="flex items-center space-x-2">
+                            <span>🔐</span>
+                            <span>Ubah Kata Sandi</span>
+                        </span>
+                        <span class="text-[10px] text-slate-500" x-text="mobilePasswordOpen ? '▲ Tutup' : '▼ Buka'">▼ Buka</span>
+                    </button>
+
+                    <div x-show="mobilePasswordOpen" x-cloak class="mt-2 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <form action="{{ route('profile.password') }}" method="POST" class="space-y-2.5 text-xs">
+                            @csrf
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Password Saat Ini</label>
+                                <input type="password" name="current_password" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Password Baru</label>
+                                <input type="password" name="new_password" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Konfirmasi Password Baru</label>
+                                <input type="password" name="new_password_confirmation" required
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <button type="submit" class="w-full py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition">
+                                Simpan Kata Sandi Baru
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tombol Keluar Aplikasi -->
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full py-3 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Keluar Aplikasi</span>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
 
     <!-- MAIN CONTENT AREA -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">

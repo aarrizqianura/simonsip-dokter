@@ -153,45 +153,5 @@
     @endfor
 </div>
 
-<!-- Pengaturan Keamanan Akun (Collapsible) -->
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden" x-data="{ showPasswordForm: false }">
-    <div class="px-6 py-4 flex items-center justify-between">
-        <div>
-            <h3 class="text-sm font-bold text-slate-800">🔐 Keamanan Akun Portal Dokter</h3>
-            <p class="text-xs text-slate-500">Perbarui kata sandi akun login SIMONSIP Anda secara berkala</p>
-        </div>
-        <button type="button" @click="showPasswordForm = !showPasswordForm"
-                class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
-            <span x-text="showPasswordForm ? 'Tutup Formulir' : 'Ubah Password'">Ubah Password</span>
-        </button>
-    </div>
-
-    <div x-show="showPasswordForm" x-cloak class="px-6 pb-6 pt-2 border-t border-slate-100">
-        <form action="{{ route('profile.password') }}" method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs items-end">
-            @csrf
-            <div>
-                <label class="block font-semibold text-slate-700 mb-1">Password Saat Ini</label>
-                <input type="password" name="current_password" required
-                       class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-700 mb-1">Password Baru</label>
-                <input type="password" name="new_password" required
-                       class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-            <div class="flex gap-2">
-                <div class="flex-1">
-                    <label class="block font-semibold text-slate-700 mb-1">Konfirmasi Password</label>
-                    <input type="password" name="new_password_confirmation" required
-                           class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold self-end shrink-0">
-                    Simpan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 @endsection
 
