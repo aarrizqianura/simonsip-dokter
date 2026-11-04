@@ -49,6 +49,19 @@ class NotificationLog extends Model
         return $this->belongsTo(User::class, 'sender_user_id');
     }
 
+    /**
+     * Provide array data compatibility (`$notif->data['title']` & `$notif->data['message']`).
+     *
+     * @return array{title: string, message: string}
+     */
+    public function getDataAttribute(): array
+    {
+        return [
+            'title' => $this->title,
+            'message' => $this->payload,
+        ];
+    }
+
     public function getMessageTypeLabelAttribute(): string
     {
         return match ($this->message_type) {

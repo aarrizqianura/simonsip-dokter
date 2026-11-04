@@ -47,6 +47,19 @@ class User extends Authenticatable
             ->where('status', 'sent');
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(NotificationLog::class, 'recipient_user_id')
+            ->latest('sent_at');
+    }
+
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(NotificationLog::class, 'recipient_user_id')
+            ->where('status', 'sent')
+            ->latest('sent_at');
+    }
+
     public function isAdminOrSuperAdmin(): bool
     {
         return in_array($this->role, ['super_admin', 'admin_sdm'], true);

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(auth()->user()?->isDokter() ? 'layouts.dokter' : 'layouts.app')
 
 @section('title', 'Pusat Notifikasi Web')
 @section('page_title', '🔔 Pusat Notifikasi Web (In-App Notification Center & Audit Log)')

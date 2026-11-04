@@ -76,7 +76,7 @@
 
                 <!-- 2. Master Data Dokter -->
                 <a href="{{ route('dokter.index') }}"
-                   class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition {{ request()->routeIs('dokter.*') ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                   class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition {{ request()->routeIs('dokter.index', 'dokter.create', 'dokter.show', 'dokter.edit') ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <span class="flex items-center gap-3">
                         <span>👨‍⚕️</span>
                         <span>Master Data Dokter</span>

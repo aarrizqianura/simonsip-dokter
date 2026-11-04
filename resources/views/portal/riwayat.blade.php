@@ -1,7 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dokter')
 
-@section('title', 'Riwayat SIP & Verifikasi')
-@section('page_title', '📜 Riwayat Pengajuan SIP & Catatan Verifikator SDM')
+@section('title', 'Riwayat SIP - SIMONSIP RSUD Dr. H. Moch. Ansari Saleh')
 
 @section('content')
 <div class="space-y-6">
@@ -10,7 +9,7 @@
             <h2 class="text-base font-extrabold text-slate-900">Track Log Pengajuan Berkas SIP: {{ $dokter->nama_lengkap }}</h2>
             <p class="text-xs text-slate-500">Rekam jejak kronologis seluruh SIP aktif, menunggu verifikasi, ditolak/revisi, maupun diarsipkan.</p>
         </div>
-        <a href="{{ route('portal.renewal.create') }}"
+        <a href="{{ route('dokter.renewal') }}"
            class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">
             + Unggah Perpanjangan SIP Baru
         </a>

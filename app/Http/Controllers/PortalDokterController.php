@@ -52,6 +52,9 @@ class PortalDokterController extends Controller
             return [$place => $sip];
         });
 
+        $sips = $activeSipsByPlace->filter()->values();
+        $sipUtama = $sips->firstWhere('tempat_praktik_ke', 1) ?? $sips->first();
+
         $pendingSips = $dokter
             ? $dokter->sipRecords->where('status', 'menunggu_verifikasi')
             : collect();
@@ -61,8 +64,10 @@ class PortalDokterController extends Controller
             ->limit(8)
             ->get();
 
-        return view('portal.dashboard', compact(
+        return view('dokter.dashboard', compact(
             'dokter',
+            'sipUtama',
+            'sips',
             'activeSipsByPlace',
             'pendingSips',
             'notifications'

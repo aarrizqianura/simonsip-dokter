@@ -1,12 +1,11 @@
-@extends('layouts.app')
+@extends('layouts.dokter')
 
-@section('title', 'Unggah Perpanjangan SIP (1-Step Renewal)')
-@section('page_title', '📤 Unggah Perpanjangan SIP (1-Step Renewal Form)')
+@section('title', 'Unggah Perpanjangan SIP - SIMONSIP RSUD Dr. H. Moch. Ansari Saleh')
 
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-        <a href="{{ route('portal.dashboard') }}" class="text-xs font-bold text-slate-600 hover:text-slate-900">
+        <a href="{{ route('dokter.dashboard') }}" class="text-xs font-bold text-slate-600 hover:text-slate-900">
             ← Kembali ke Dashboard Saya
         </a>
         <span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200 text-xs font-bold">
@@ -40,7 +39,7 @@
                         @foreach([1 => 'Praktik Ke-1 (Utama)', 2 => 'Praktik Ke-2', 3 => 'Praktik Ke-3'] as $val => $label)
                             <label class="p-3 rounded-xl border border-slate-300 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 cursor-pointer flex items-center gap-2 font-bold text-slate-800">
                                 <input type="radio" name="tempat_praktik_ke" value="{{ $val }}"
-                                       @checked(old('tempat_praktik_ke', $selectedSip?->tempat_praktik_ke ?? 1) == $val)
+                                       @checked(old('tempat_praktik_ke', request('tempat_praktik_ke', $selectedSip?->tempat_praktik_ke ?? 1)) == $val)
                                        class="text-emerald-600 focus:ring-emerald-500">
                                 <span>{{ $label }}</span>
                             </label>

@@ -60,7 +60,20 @@ class ExampleTest extends TestCase
             'message_type' => 'account_created',
         ]);
 
-        // 2. Doctor logs in and submits 1-Step Renewal
+        // 2. Doctor logs in, views Top Navigation Dashboard, Renewal form, and submits 1-Step Renewal
+        $this->actingAs($dokterUser)
+            ->get(route('dokter.dashboard'))
+            ->assertStatus(200)
+            ->assertSee('Portal Dokter')
+            ->assertSee('Pemberitahuan Sistem')
+            ->assertSee('Digital Preview Kartu SIP Saya')
+            ->assertSee('503/0991/SIP-DOK/DPMPTSP/2022');
+
+        $this->actingAs($dokterUser)
+            ->get(route('dokter.renewal'))
+            ->assertStatus(200)
+            ->assertSee('FORMULIR 1-STEP RENEWAL');
+
         $renewalResponse = $this->actingAs($dokterUser)->post('/portal/renewal', [
             'tempat_praktik_ke' => 1,
             'no_sip' => '503/0999/SIP-DOK/DPMPTSP/2026',
@@ -70,6 +83,11 @@ class ExampleTest extends TestCase
         ]);
 
         $renewalResponse->assertRedirect(route('portal.riwayat'));
+
+        $this->actingAs($dokterUser)
+            ->get(route('dokter.riwayat'))
+            ->assertStatus(200)
+            ->assertSee('503/0999/SIP-DOK/DPMPTSP/2026');
 
         $newSip = SipRecord::where('no_sip', '503/0999/SIP-DOK/DPMPTSP/2026')->firstOrFail();
         $this->assertEquals('menunggu_verifikasi', $newSip->status);
