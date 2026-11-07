@@ -93,6 +93,16 @@ class ExampleTest extends TestCase
         $this->assertEquals('menunggu_verifikasi', $newSip->status);
         $this->assertFalse($newSip->is_verified);
 
+        // 2b. Admin SDM views the redesigned Verifikasi SIP Baru page (Table + Accordion + Quick Preview PDF Modal)
+        $this->actingAs($adminSdm)
+            ->get(route('verifikasi.index'))
+            ->assertStatus(200)
+            ->assertSee('Tabel Interaktif')
+            ->assertSee('Kartu Ringkas')
+            ->assertSee('Detail Lengkap')
+            ->assertSee('modal-preview-pdf')
+            ->assertSee('modal-quick-verify');
+
         // 3. Admin SDM approves the new SIP submission
         $approveResponse = $this->actingAs($adminSdm)->post(route('verifikasi.approve', $newSip), [
             'catatan_verifikasi' => 'Dokumen sah dan terverifikasi SDM.',
