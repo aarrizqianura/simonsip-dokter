@@ -104,6 +104,101 @@
         </a>
     </div>
 
+    <!-- VISUAL ANALYTICS: DOUGHNUT CHARTS -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Doughnut Chart 1: Distribusi Status Traffic Light SIP -->
+        <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-900">🍩 Proporsi Status Masa Berlaku SIP</h3>
+                    <p class="text-xs text-slate-500">Distribusi indikator Traffic Light dari {{ $totalSipAktif }} SIP aktif &amp; antrean SDM</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Kepatuhan: {{ $persentaseKepatuhan }}%
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center my-auto">
+                <div class="sm:col-span-6 relative flex items-center justify-center h-52">
+                    <canvas id="sipStatusDoughnutChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-2xl font-extrabold text-slate-900">{{ $totalSipAktif }}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">SIP Aktif</span>
+                    </div>
+                </div>
+
+                <div class="sm:col-span-6 space-y-2 text-xs">
+                    @php
+                        $totalForPct = max($totalSipAktif + $countPendingApproval, 1);
+                        $statusLegend = [
+                            ['label' => 'Aman (> 90 Hari)', 'count' => $countAman, 'color' => 'bg-emerald-500', 'text' => 'text-emerald-700'],
+                            ['label' => 'Peringatan (61–90 Hr)', 'count' => $countWarning, 'color' => 'bg-amber-400', 'text' => 'text-amber-700'],
+                            ['label' => 'Mendesak (31–60 Hr)', 'count' => $countMendesak, 'color' => 'bg-orange-500', 'text' => 'text-orange-700'],
+                            ['label' => 'Kadaluarsa (≤ 30 Hr)', 'count' => $countExpired, 'color' => 'bg-rose-600', 'text' => 'text-rose-700'],
+                            ['label' => 'Antrean Verifikasi SDM', 'count' => $countPendingApproval, 'color' => 'bg-sky-500', 'text' => 'text-sky-700'],
+                        ];
+                    @endphp
+                    @foreach($statusLegend as $item)
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full {{ $item['color'] }} shrink-0"></span>
+                                <span class="font-semibold text-slate-700">{{ $item['label'] }}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-extrabold {{ $item['text'] }}">{{ $item['count'] }}</span>
+                                <span class="text-[10px] text-slate-400 font-semibold">({{ round(($item['count'] / $totalForPct) * 100, 1) }}%)</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Doughnut Chart 2: Distribusi SIP Aktif per KSM -->
+        <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-900">🏛️ Distribusi SIP Aktif per KSM</h3>
+                    <p class="text-xs text-slate-500">Proporsi kepemilikan SIP dokter berdasarkan Kelompok Staf Medis</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ $ksmStats->count() }} KSM
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center my-auto">
+                <div class="sm:col-span-6 relative flex items-center justify-center h-52">
+                    <canvas id="ksmDistributionDoughnutChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-2xl font-extrabold text-slate-900">{{ $totalDokter }}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Dokter</span>
+                    </div>
+                </div>
+
+                <div class="sm:col-span-6 space-y-1.5 max-h-52 overflow-y-auto pr-1 text-xs">
+                    @php
+                        $ksmColors = ['#10b981', '#0ea5e9', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#64748b'];
+                    @endphp
+                    @foreach($ksmStats as $idx => $stat)
+                        @php
+                            $dotColor = $ksmColors[$idx % count($ksmColors)];
+                        @endphp
+                        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $dotColor }}"></span>
+                                <span class="font-semibold text-slate-700 truncate" title="{{ $stat['nama_ksm'] }}">{{ $stat['nama_ksm'] }}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                                <span class="font-extrabold text-slate-900">{{ $stat['total_sip'] }} SIP</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-600 font-bold">{{ $stat['total_dokter'] }} dr</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN MONITORING TABLE -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-50/60">
@@ -331,4 +426,127 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Chart === 'undefined') {
+            return;
+        }
+
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+
+        // 1. Doughnut Chart: Status Masa Berlaku SIP (Traffic Light)
+        const statusCanvas = document.getElementById('sipStatusDoughnutChart');
+        if (statusCanvas) {
+            const statusCounts = [
+                {{ (int) $countAman }},
+                {{ (int) $countWarning }},
+                {{ (int) $countMendesak }},
+                {{ (int) $countExpired }},
+                {{ (int) $countPendingApproval }}
+            ];
+            const totalStatus = statusCounts.reduce((acc, val) => acc + val, 0);
+
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Aman (> 90 Hari)',
+                        'Peringatan (61–90 Hari)',
+                        'Mendesak (31–60 Hari)',
+                        'Kadaluarsa (≤ 30 Hari)',
+                        'Antrean Verifikasi SDM'
+                    ],
+                    datasets: [{
+                        data: totalStatus > 0 ? statusCounts : [1],
+                        backgroundColor: totalStatus > 0
+                            ? ['#10b981', '#fbbf24', '#f97316', '#e11d48', '#0ea5e9']
+                            : ['#e2e8f0'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: totalStatus > 0,
+                            backgroundColor: '#0f172a',
+                            padding: 10,
+                            cornerRadius: 10,
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function (ctx) {
+                                    const val = ctx.parsed || 0;
+                                    const pct = totalStatus > 0 ? ((val / totalStatus) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${val} SIP (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Doughnut Chart: Distribusi SIP Aktif per KSM
+        const ksmCanvas = document.getElementById('ksmDistributionDoughnutChart');
+        if (ksmCanvas) {
+            const ksmLabels = @json($ksmStats->pluck('nama_ksm')->values());
+            const ksmData = @json($ksmStats->pluck('total_sip')->map(fn ($v) => (int) $v)->values());
+            const ksmPalette = ['#10b981', '#0ea5e9', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#64748b'];
+            const totalKsmSip = ksmData.reduce((acc, val) => acc + val, 0);
+
+            new Chart(ksmCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ksmLabels,
+                    datasets: [{
+                        data: totalKsmSip > 0 ? ksmData : [1],
+                        backgroundColor: totalKsmSip > 0
+                            ? ksmLabels.map((_, i) => ksmPalette[i % ksmPalette.length])
+                            : ['#e2e8f0'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: totalKsmSip > 0,
+                            backgroundColor: '#0f172a',
+                            padding: 10,
+                            cornerRadius: 10,
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function (ctx) {
+                                    const val = ctx.parsed || 0;
+                                    const pct = totalKsmSip > 0 ? ((val / totalKsmSip) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${val} SIP Aktif (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+@endpush
 
