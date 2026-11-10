@@ -31,8 +31,10 @@
                 <select name="role" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white">
                     <option value="admin_sdm">Admin SDM (Staf Kepegawaian)</option>
                     <option value="super_admin">Super Admin (IT / Manajemen)</option>
-                    <option value="dokter">Dokter (Staf Medis Mandiri)</option>
                 </select>
+                <p class="text-[11px] text-slate-500 mt-1">
+                    💡 Untuk membuat akun <strong>Dokter</strong> beserta biodata &amp; SIP, gunakan menu <a href="{{ route('dokter.create') }}" class="text-emerald-700 font-bold hover:underline">Input Dokter Baru + Auto Akun →</a>
+                </p>
             </div>
 
             <div>
@@ -92,12 +94,23 @@
                                 </form>
                             </td>
                             <td class="py-3 px-4">
-                                <select name="role" form="form-user-{{ $u->id }}"
-                                        class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
-                                    <option value="super_admin" @selected($u->role === 'super_admin')>Super Admin</option>
-                                    <option value="admin_sdm" @selected($u->role === 'admin_sdm')>Admin SDM</option>
-                                    <option value="dokter" @selected($u->role === 'dokter')>Dokter</option>
-                                </select>
+                                @if($u->role === 'dokter')
+                                    <input type="hidden" name="role" value="dokter" form="form-user-{{ $u->id }}">
+                                    <span class="inline-block px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 font-bold text-xs">
+                                        👨‍⚕️ Dokter (Staf Medis)
+                                    </span>
+                                    @if($u->dokter)
+                                        <a href="{{ route('dokter.show', $u->dokter) }}" class="block text-[11px] text-emerald-700 font-semibold hover:underline mt-1">
+                                            Lihat Profil &amp; SIP →
+                                        </a>
+                                    @endif
+                                @else
+                                    <select name="role" form="form-user-{{ $u->id }}"
+                                            class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                        <option value="super_admin" @selected($u->role === 'super_admin')>Super Admin</option>
+                                        <option value="admin_sdm" @selected($u->role === 'admin_sdm')>Admin SDM</option>
+                                    </select>
+                                @endif
                             </td>
                             <td class="py-3 px-4">
                                 <input type="text" name="password" form="form-user-{{ $u->id }}"

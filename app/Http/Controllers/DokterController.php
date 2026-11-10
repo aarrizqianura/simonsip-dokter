@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dokter;
 use App\Models\Ksm;
+use App\Models\NotificationLog;
 use App\Models\SipRecord;
 use App\Models\Spesialisasi;
 use App\Models\User;
@@ -301,11 +302,23 @@ class DokterController extends Controller
             'catatan_verifikasi' => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Archive existing active SIP for the same tempat_praktik_ke if any
-        SipRecord::where('dokter_id', $dokter->id)
+        // Archive existing active or pending SIP for the same tempat_praktik_ke if any
+        $existingIds = SipRecord::where('dokter_id', $dokter->id)
             ->where('tempat_praktik_ke', (int) $validated['tempat_praktik_ke'])
-            ->whereIn('status', ['aktif', 'warning', 'mendesak', 'expired'])
-            ->update(['status' => 'archived']);
+            ->whereIn('status', ['aktif', 'warning', 'mendesak', 'expired', 'menunggu_verifikasi'])
+            ->pluck('id');
+
+        if ($existingIds->isNotEmpty()) {
+            SipRecord::whereIn('id', $existingIds)->update(['status' => 'archived']);
+
+            NotificationLog::whereIn('sip_record_id', $existingIds)
+                ->where('message_type', 'pengajuan_sip_baru')
+                ->where('status', 'sent')
+                ->update([
+                    'status' => 'read',
+                    'read_at' => Carbon::now(),
+                ]);
+        }
 
         if ($request->hasFile('file_sip')) {
             $filePath = $request->file('file_sip')->store('sip_files', 'public');
@@ -346,9 +359,15 @@ class DokterController extends Controller
     /**
      * Stream or preview the SIP PDF file in the browser.
      */
-    public function previewSipPdf(SipRecord $sipRecord, SipPdfGeneratorService $pdfGenerator): Response
+    public function previewSipPdf(Request $request, SipRecord $sipRecord, SipPdfGeneratorService $pdfGenerator): Response
     {
         $sipRecord->load(['dokter.spesialisasi']);
+
+        /** @var User|null $user */
+        $user = $request->user();
+        if ($user && $user->isDokter() && $sipRecord->dokter?->user_id !== $user->id) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat dokumen SIP milik dokter lain.');
+        }
 
         if (! Storage::disk('public')->exists($sipRecord->file_sip_path)) {
             $dokter = $sipRecord->dokter;

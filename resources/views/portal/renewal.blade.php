@@ -37,11 +37,21 @@
                     <label class="block font-bold text-slate-700 mb-1.5">Pilih Tempat Praktik Ke- <span class="text-rose-600">*</span></label>
                     <div class="grid grid-cols-3 gap-3">
                         @foreach([1 => 'Praktik Ke-1 (Utama)', 2 => 'Praktik Ke-2', 3 => 'Praktik Ke-3'] as $val => $label)
-                            <label class="p-3 rounded-xl border border-slate-300 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 cursor-pointer flex items-center gap-2 font-bold text-slate-800">
-                                <input type="radio" name="tempat_praktik_ke" value="{{ $val }}"
-                                       @checked(old('tempat_praktik_ke', request('tempat_praktik_ke', $selectedSip?->tempat_praktik_ke ?? 1)) == $val)
-                                       class="text-emerald-600 focus:ring-emerald-500">
-                                <span>{{ $label }}</span>
+                            @php
+                                $isPlacePending = in_array($val, $pendingPlaces ?? [], true);
+                            @endphp
+                            <label class="p-3 rounded-xl border border-slate-300 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 cursor-pointer flex flex-col gap-1 font-bold text-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="tempat_praktik_ke" value="{{ $val }}"
+                                           @checked(old('tempat_praktik_ke', request('tempat_praktik_ke', $selectedSip?->tempat_praktik_ke ?? 1)) == $val)
+                                           class="text-emerald-600 focus:ring-emerald-500">
+                                    <span>{{ $label }}</span>
+                                </div>
+                                @if($isPlacePending)
+                                    <span class="text-[10px] font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5 w-fit">
+                                        🔵 Sedang Menunggu Verifikasi
+                                    </span>
+                                @endif
                             </label>
                         @endforeach
                     </div>
@@ -74,8 +84,8 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <label class="block font-bold text-slate-700 mb-1">Unggah Berkas PDF SIP Baru (Maks. 5MB)</label>
-                    <input type="file" name="file_sip" accept="application/pdf"
+                    <label class="block font-bold text-slate-700 mb-1">Unggah Berkas PDF SIP Baru (Maks. 5MB) <span class="text-rose-600">*</span></label>
+                    <input type="file" name="file_sip" accept="application/pdf" required
                            class="w-full border border-dashed border-emerald-400 rounded-xl p-3.5 bg-emerald-50/40">
                     <p class="text-[11px] text-slate-500 mt-1">
                         Pastikan nomor SIP, tanda tangan elektronik / QR Code DPMPTSP terlihat jelas.

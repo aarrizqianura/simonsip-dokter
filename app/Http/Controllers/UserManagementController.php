@@ -35,11 +35,17 @@ class UserManagementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if ($request->input('role') === 'dokter') {
+            return redirect()
+                ->route('dokter.create')
+                ->with('error', 'Pembuatan akun Dokter dilakukan secara terpadu melalui formulir Master Data Dokter agar biodata, KSM, STR, dan SIP otomatis terhubung.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:100', 'unique:users,username'],
             'password' => ['required', 'string', 'min:6'],
-            'role' => ['required', 'in:super_admin,admin_sdm,dokter'],
+            'role' => ['required', 'in:super_admin,admin_sdm'],
         ]);
 
         User::create([
@@ -49,7 +55,7 @@ class UserManagementController extends Controller
             'role' => $validated['role'],
         ]);
 
-        return back()->with('success', 'Pengguna baru (' . $validated['username'] . ') berhasil ditambahkan.');
+        return back()->with('success', 'Pengguna Admin baru (' . $validated['username'] . ') berhasil ditambahkan.');
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -60,6 +66,14 @@ class UserManagementController extends Controller
             'role' => ['required', 'in:super_admin,admin_sdm,dokter'],
             'password' => ['nullable', 'string', 'min:6'],
         ]);
+
+        if ($validated['role'] === 'dokter' && ! $user->dokter) {
+            return back()->with('error', 'Akun Admin tidak dapat diubah menjadi role Dokter karena tidak memiliki profil biodata dokter.');
+        }
+
+        if ($user->role === 'dokter' && $validated['role'] !== 'dokter') {
+            return back()->with('error', 'Role akun Dokter yang terhubung dengan data medis tidak dapat diubah menjadi Admin.');
+        }
 
         $updates = [
             'name' => $validated['name'],
@@ -72,6 +86,10 @@ class UserManagementController extends Controller
         }
 
         $user->update($updates);
+
+        if ($user->dokter && $user->dokter->nama_lengkap !== $validated['name']) {
+            $user->dokter->update(['nama_lengkap' => $validated['name']]);
+        }
 
         return back()->with('success', 'Data akun pengguna ' . $user->name . ' berhasil diperbarui.');
     }

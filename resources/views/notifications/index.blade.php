@@ -118,7 +118,7 @@
                         <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
                             <span>Pengirim: {{ $notif->sender?->name ?? 'Scheduler Otomatis SIMONSIP (07:00 WITA)' }}</span>
                             <div class="flex items-center gap-2">
-                                @if($notif->status === 'sent')
+                                @if($notif->status === 'sent' && ($notif->recipient_user_id === $authUser->id || ($authUser->isAdminOrSuperAdmin() && $notif->message_type === 'pengajuan_sip_baru')))
                                     <form action="{{ route('notifications.read', $notif) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="text-emerald-700 font-bold hover:underline">
@@ -126,7 +126,7 @@
                                         </button>
                                     </form>
                                 @endif
-                                @if($notif->action_url)
+                                @if($notif->action_url || ($authUser->isAdminOrSuperAdmin() && ($notif->sip_record_id || $notif->recipient?->dokter)))
                                     <a href="{{ route('notifications.read', ['notificationLog' => $notif->id, 'redirect' => 1]) }}"
                                        class="text-sky-700 font-bold hover:underline">
                                         Buka Tautan Terkait →

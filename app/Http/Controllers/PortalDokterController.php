@@ -83,7 +83,11 @@ class PortalDokterController extends Controller
             ->first();
 
         if (! $dokter) {
-            return redirect()->route('dashboard')->with('error', 'Profil dokter tidak ditemukan pada akun ini.');
+            if ($user->isAdminOrSuperAdmin()) {
+                return redirect()->route('dashboard')->with('error', 'Profil dokter tidak ditemukan pada akun Admin.');
+            }
+
+            return redirect()->route('portal.dashboard')->with('error', 'Profil biodata dokter Anda belum terhubung. Silakan hubungi Admin SDM.');
         }
 
         $selectedSip = null;
@@ -91,7 +95,14 @@ class PortalDokterController extends Controller
             $selectedSip = $dokter->sipRecords->firstWhere('id', (int) $request->query('sip_id'));
         }
 
-        return view('portal.renewal', compact('dokter', 'selectedSip'));
+        $pendingPlaces = $dokter->sipRecords
+            ->where('status', 'menunggu_verifikasi')
+            ->pluck('tempat_praktik_ke')
+            ->unique()
+            ->values()
+            ->all();
+
+        return view('portal.renewal', compact('dokter', 'selectedSip', 'pendingPlaces'));
     }
 
     /**
@@ -106,7 +117,12 @@ class PortalDokterController extends Controller
         $user = $request->user();
         $dokter = Dokter::with(['ksm', 'spesialisasi'])
             ->where('user_id', $user->id)
-            ->firstOrFail();
+            ->first();
+
+        if (! $dokter) {
+            return redirect()->route('portal.dashboard')
+                ->with('error', 'Profil biodata dokter Anda belum terhubung. Silakan hubungi Admin SDM.');
+        }
 
         $validated = $request->validate([
             'tempat_praktik_ke' => ['required', 'integer', 'in:1,2,3'],
@@ -118,6 +134,23 @@ class PortalDokterController extends Controller
         ], [
             'tgl_kadaluarsa.after' => 'Tanggal kadaluarsa SIP Baru harus setelah tanggal terbit.',
         ]);
+
+        $alreadyPending = SipRecord::where('dokter_id', $dokter->id)
+            ->where('tempat_praktik_ke', (int) $validated['tempat_praktik_ke'])
+            ->where('status', 'menunggu_verifikasi')
+            ->exists();
+
+        if ($alreadyPending) {
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    sprintf(
+                        'Anda masih memiliki pengajuan SIP Praktik Ke-%d yang sedang Menunggu Verifikasi SDM. Mohon tunggu hasil pemeriksaan SDM sebelum mengirim pengajuan baru di tempat praktik yang sama.',
+                        (int) $validated['tempat_praktik_ke']
+                    )
+                );
+        }
 
         $sipRecord = DB::transaction(function () use ($request, $user, $dokter, $validated, $notificationService, $pdfGenerator) {
             if ($request->hasFile('file_sip')) {
@@ -181,7 +214,12 @@ class PortalDokterController extends Controller
         ])->where('user_id', $user->id)->first();
 
         if (! $dokter) {
-            return redirect()->route('dashboard');
+            if ($user->isAdminOrSuperAdmin()) {
+                return redirect()->route('dashboard');
+            }
+
+            return redirect()->route('portal.dashboard')
+                ->with('error', 'Profil biodata dokter Anda belum terhubung. Silakan hubungi Admin SDM.');
         }
 
         return view('portal.riwayat', compact('dokter'));

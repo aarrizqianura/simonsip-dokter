@@ -75,17 +75,41 @@ class NotificationCenterController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if ($notificationLog->recipient_user_id === $user->id || $user->isAdminOrSuperAdmin()) {
-            if ($notificationLog->status !== 'read') {
-                $notificationLog->update([
-                    'status' => 'read',
-                    'read_at' => Carbon::now(),
-                ]);
-            }
+        $isRecipient = $notificationLog->recipient_user_id === $user->id;
+        $isAdminSharedSubmissionAlert = $user->isAdminOrSuperAdmin()
+            && $notificationLog->message_type === 'pengajuan_sip_baru';
+
+        // Only mark as read if the current user is the actual recipient (or an Admin handling an admin submission alert)
+        // so that Admin monitoring does not falsify Doctor read-rate audit metrics.
+        if (($isRecipient || $isAdminSharedSubmissionAlert) && $notificationLog->status !== 'read') {
+            $notificationLog->update([
+                'status' => 'read',
+                'read_at' => Carbon::now(),
+            ]);
         }
 
-        if ($request->boolean('redirect') && $notificationLog->action_url && $notificationLog->recipient_user_id === $user->id) {
-            return redirect($notificationLog->action_url);
+        if ($request->boolean('redirect')) {
+            if ($isRecipient && $notificationLog->action_url) {
+                return redirect($notificationLog->action_url);
+            }
+
+            if ($user->isAdminOrSuperAdmin()) {
+                if ($notificationLog->message_type === 'pengajuan_sip_baru') {
+                    return redirect()->route('verifikasi.index');
+                }
+
+                $notificationLog->loadMissing(['sipRecord', 'recipient.dokter']);
+                $dokterId = $notificationLog->sipRecord?->dokter_id
+                    ?? $notificationLog->recipient?->dokter?->id;
+
+                if ($dokterId) {
+                    return redirect()->route('dokter.show', $dokterId);
+                }
+
+                if ($notificationLog->action_url && ! str_starts_with($notificationLog->action_url, '/portal')) {
+                    return redirect($notificationLog->action_url);
+                }
+            }
         }
 
         return back()->with('success', 'Notifikasi ditandai telah dibaca.');
@@ -161,6 +185,7 @@ class NotificationCenterController extends Controller
                 'payload' => $log->payload,
                 'message_type' => $log->message_type,
                 'type_label' => $log->message_type_label,
+                'type_badge_class' => $log->type_badge_class,
                 'sent_at_human' => $log->sent_at?->diffForHumans() ?? 'Baru saja',
                 'read_url' => route('notifications.read', ['notificationLog' => $log->id, 'redirect' => 1], false),
             ]);

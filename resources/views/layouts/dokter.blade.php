@@ -87,7 +87,7 @@
                             </div>
                         </div>
                         
-                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                        <div id="dokter-notif-dropdown-list" class="space-y-2 max-h-64 overflow-y-auto">
                             @forelse(auth()->user()->notifications->take(5) as $notif)
                                 <a href="{{ route('notifications.read', ['notificationLog' => $notif->id, 'redirect' => 1]) }}"
                                    class="block p-2.5 rounded-lg text-xs transition hover:bg-emerald-50 {{ $notif->read_at ? 'bg-slate-50 text-slate-600' : 'bg-emerald-50/60 text-slate-900 font-semibold' }}">
@@ -370,7 +370,13 @@
 
         updateBrowserNotifButtonState();
 
-        // Real-time polling for unread notification badge every 15 seconds
+        function escapeDokterHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        // Real-time polling for unread notification badge & dropdown every 15 seconds
         let lastSeenDokterNotifId = null;
         setInterval(function () {
             fetch('{{ route('notifications.poll') }}', {
@@ -393,6 +399,17 @@
                 }
                 if (data.latest && data.latest.length > 0) {
                     const newest = data.latest[0];
+                    const listEl = document.getElementById('dokter-notif-dropdown-list');
+                    if (listEl) {
+                        listEl.innerHTML = data.latest.map(item => `
+                            <a href="${escapeDokterHtml(item.read_url)}"
+                               class="block p-2.5 rounded-lg text-xs transition hover:bg-emerald-50 bg-emerald-50/60 text-slate-900 font-semibold">
+                                <p class="font-bold text-slate-800">${escapeDokterHtml(item.title)}</p>
+                                <p class="mt-0.5 line-clamp-2">${escapeDokterHtml(item.payload)}</p>
+                                <span class="text-[10px] text-slate-400 mt-1 block">${escapeDokterHtml(item.sent_at_human)}</span>
+                            </a>
+                        `).join('');
+                    }
                     if (lastSeenDokterNotifId !== null && newest.id !== lastSeenDokterNotifId) {
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification(newest.title, { body: newest.payload });

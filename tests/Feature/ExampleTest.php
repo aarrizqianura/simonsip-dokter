@@ -93,6 +93,15 @@ class ExampleTest extends TestCase
         $this->assertEquals('menunggu_verifikasi', $newSip->status);
         $this->assertFalse($newSip->is_verified);
 
+        // 2a. Submitting a duplicate renewal for the same tempat_praktik_ke while still pending is blocked
+        $duplicateRenewal = $this->actingAs($dokterUser)->post('/portal/renewal', [
+            'tempat_praktik_ke' => 1,
+            'no_sip' => '503/1000/SIP-DOK/DPMPTSP/2026',
+            'tgl_terbit' => Carbon::today()->format('Y-m-d'),
+            'tgl_kadaluarsa' => Carbon::today()->addYears(5)->format('Y-m-d'),
+        ]);
+        $duplicateRenewal->assertSessionHas('error');
+
         // 2b. Admin SDM views the redesigned Verifikasi SIP Baru page (Table + Accordion + Quick Preview PDF Modal)
         $this->actingAs($adminSdm)
             ->get(route('verifikasi.index'))
@@ -116,6 +125,13 @@ class ExampleTest extends TestCase
         $this->assertEquals('aktif', $newSip->status);
         $this->assertTrue($newSip->is_verified);
         $this->assertEquals('archived', $initialSip->status);
+
+        // Admin submission notifications for this SIP are automatically marked as read
+        $this->assertDatabaseMissing('notification_logs', [
+            'sip_record_id' => $newSip->id,
+            'message_type' => 'pengajuan_sip_baru',
+            'status' => 'sent',
+        ]);
 
         // 4. Verify all 5 Executive Reports render 200 OK
         foreach (['kepatuhan', 'notifikasi', 'verifikasi', 'histori', 'sla'] as $tab) {

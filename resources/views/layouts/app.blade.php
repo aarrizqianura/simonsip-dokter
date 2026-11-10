@@ -161,11 +161,42 @@
             </nav>
         </div>
 
-        <!-- BAGIAN BAWAH: Scheduler & Tombol Keluar (Sticky Footer) -->
-        <div class="p-4 border-t border-slate-800 bg-slate-950/60 flex-shrink-0">
-            <div class="flex justify-between items-center text-[11px] text-slate-400 mb-3 px-1">
+        <!-- BAGIAN BAWAH: Scheduler, Ubah Kata Sandi, & Tombol Keluar (Sticky Footer) -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950/60 flex-shrink-0 space-y-2.5">
+            <div class="flex justify-between items-center text-[11px] text-slate-400 px-1">
                 <span>Scheduler Harian:</span>
                 <span class="text-emerald-400 font-bold">07:00 WITA</span>
+            </div>
+
+            <div>
+                <button type="button" onclick="document.getElementById('admin-password-panel').classList.toggle('hidden')"
+                        class="w-full py-2 px-3 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-xl font-semibold text-xs transition flex items-center justify-between">
+                    <span>🔐 Ubah Kata Sandi</span>
+                    <span class="text-[10px] text-slate-400">▼</span>
+                </button>
+                <div id="admin-password-panel" class="hidden mt-2 p-3 rounded-xl bg-slate-900 border border-slate-700">
+                    <form action="{{ route('profile.password') }}" method="POST" class="space-y-2 text-xs">
+                        @csrf
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-0.5">Password Saat Ini</label>
+                            <input type="password" name="current_password" required
+                                   class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-0.5">Password Baru</label>
+                            <input type="password" name="new_password" required
+                                   class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-0.5">Konfirmasi Password Baru</label>
+                            <input type="password" name="new_password_confirmation" required
+                                   class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white outline-none">
+                        </div>
+                        <button type="submit" class="w-full py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition">
+                            Simpan Password
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <form action="{{ route('logout') }}" method="POST">
@@ -353,7 +384,13 @@
 
     updateBrowserNotifButtonState();
 
-    // Real-time polling for Topbar Bell Badge every 15 seconds
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    // Real-time polling for Topbar Bell Badge & Dropdown every 15 seconds
     let lastSeenTopNotifId = null;
     setInterval(function () {
         fetch('{{ route('notifications.poll') }}', {
@@ -371,6 +408,36 @@
                 } else {
                     badge.classList.add('hidden');
                     badge.classList.remove('flex');
+                }
+            }
+
+            const sidebarBadge = document.getElementById('sidebar-unread-badge');
+            if (sidebarBadge) {
+                sidebarBadge.textContent = data.unread_count;
+                if (data.unread_count > 0) {
+                    sidebarBadge.classList.remove('hidden');
+                } else {
+                    sidebarBadge.classList.add('hidden');
+                }
+            }
+
+            const listEl = document.getElementById('notif-dropdown-list');
+            if (listEl && Array.isArray(data.latest)) {
+                if (data.latest.length === 0) {
+                    listEl.innerHTML = '<div class="px-4 py-8 text-center text-slate-400 text-xs">Tidak ada notifikasi baru yang belum dibaca.</div>';
+                } else {
+                    listEl.innerHTML = data.latest.map(item => `
+                        <a href="${escapeHtml(item.read_url)}" class="block px-4 py-3 hover:bg-slate-50 transition">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${escapeHtml(item.type_badge_class || 'bg-slate-100 text-slate-800 border-slate-200')}">
+                                    ${escapeHtml(item.type_label)}
+                                </span>
+                                <span class="text-[11px] text-slate-400">${escapeHtml(item.sent_at_human)}</span>
+                            </div>
+                            <p class="text-xs font-bold text-slate-900 line-clamp-1">${escapeHtml(item.title)}</p>
+                            <p class="text-xs text-slate-600 line-clamp-2 mt-0.5">${escapeHtml(item.payload)}</p>
+                        </a>
+                    `).join('');
                 }
             }
 

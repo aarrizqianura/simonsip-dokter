@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NotificationLog;
 use App\Models\SipRecord;
 use App\Services\WebNotificationService;
 use Carbon\Carbon;
@@ -36,6 +37,10 @@ class VerifikasiSipController extends Controller
         SipRecord $sipRecord,
         WebNotificationService $notificationService
     ): RedirectResponse {
+        if ($sipRecord->status !== 'menunggu_verifikasi') {
+            return back()->with('error', 'Berkas pengajuan SIP ini sudah diproses sebelumnya.');
+        }
+
         $validated = $request->validate([
             'catatan_verifikasi' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -59,6 +64,15 @@ class VerifikasiSipController extends Controller
                 'verified_at' => Carbon::now(),
                 'catatan_verifikasi' => $validated['catatan_verifikasi'] ?: 'Berkas SIP Baru telah diperiksa dan dinyatakan sah/lengkap oleh Admin SDM.',
             ]);
+
+            // Mark admin submission notifications for this SIP record as read
+            NotificationLog::where('sip_record_id', $sipRecord->id)
+                ->where('message_type', 'pengajuan_sip_baru')
+                ->where('status', 'sent')
+                ->update([
+                    'status' => 'read',
+                    'read_at' => Carbon::now(),
+                ]);
 
             $notificationService->notifyVerificationDecision(
                 sipRecord: $sipRecord,
@@ -86,6 +100,10 @@ class VerifikasiSipController extends Controller
         SipRecord $sipRecord,
         WebNotificationService $notificationService
     ): RedirectResponse {
+        if ($sipRecord->status !== 'menunggu_verifikasi') {
+            return back()->with('error', 'Berkas pengajuan SIP ini sudah diproses sebelumnya.');
+        }
+
         $validated = $request->validate([
             'catatan_verifikasi' => ['required', 'string', 'min:5', 'max:1000'],
         ], [
@@ -102,6 +120,15 @@ class VerifikasiSipController extends Controller
                 'verified_at' => Carbon::now(),
                 'catatan_verifikasi' => $validated['catatan_verifikasi'],
             ]);
+
+            // Mark admin submission notifications for this SIP record as read
+            NotificationLog::where('sip_record_id', $sipRecord->id)
+                ->where('message_type', 'pengajuan_sip_baru')
+                ->where('status', 'sent')
+                ->update([
+                    'status' => 'read',
+                    'read_at' => Carbon::now(),
+                ]);
 
             $notificationService->notifyVerificationDecision(
                 sipRecord: $sipRecord,

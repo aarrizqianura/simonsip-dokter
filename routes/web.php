@@ -86,14 +86,14 @@ Route::middleware('auth')->group(function () {
     });
 
     // Portal Mandiri Dokter (Top Navigation Layout & Route Aliases)
-    Route::prefix('portal')->name('portal.')->group(function () {
+    Route::middleware('role:dokter')->prefix('portal')->name('portal.')->group(function () {
         Route::get('/', [PortalDokterController::class, 'dashboard'])->name('dashboard');
         Route::get('/renewal', [PortalDokterController::class, 'createRenewal'])->name('renewal.create');
         Route::post('/renewal', [PortalDokterController::class, 'storeRenewal'])->name('renewal.store');
         Route::get('/riwayat', [PortalDokterController::class, 'riwayat'])->name('riwayat');
     });
 
-    Route::prefix('portal-dokter')->name('dokter.')->group(function () {
+    Route::middleware('role:dokter')->prefix('portal-dokter')->name('dokter.')->group(function () {
         Route::get('/dashboard', [PortalDokterController::class, 'dashboard'])->name('dashboard');
         Route::get('/renewal', [PortalDokterController::class, 'createRenewal'])->name('renewal');
         Route::post('/renewal', [PortalDokterController::class, 'storeRenewal'])->name('renewal.store');
