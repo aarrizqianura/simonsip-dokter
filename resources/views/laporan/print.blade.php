@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $reportTitle }} — RSUD Dr. H. Moch. Ansari Saleh Banjarmasin</title>
+    <link rel="icon" type="image/avif" href="{{ asset('images/logo-rsud.avif') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
@@ -49,8 +50,8 @@
                     Website: rsudansarisaleh.kalselprov.go.id • Email: rsud.ansarisaleh@kalselprov.go.id
                 </p>
             </div>
-            <div class="w-16 h-16 rounded-full border-2 border-emerald-800 flex items-center justify-center font-bold text-xs text-center text-emerald-900 shrink-0 sans-table">
-                RSUD<br>MAS
+            <div class="w-16 h-16 flex items-center justify-center shrink-0">
+                <img src="{{ asset('images/logo-rsud.avif') }}" alt="Logo RSUD Dr. H. Moch. Ansari Saleh" class="w-16 h-16 object-contain">
             </div>
         </div>
 

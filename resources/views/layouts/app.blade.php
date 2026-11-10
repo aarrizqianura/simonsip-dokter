@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SIMONSIP') — RSUD Dr. H. Moch. Ansari Saleh Banjarmasin</title>
+    <link rel="icon" type="image/avif" href="{{ asset('images/logo-rsud.avif') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,8 +37,8 @@
         <div class="overflow-y-auto flex-grow">
             <!-- Logo SIMONSIP -->
             <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
-                <div class="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    RS
+                <div class="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center shadow-sm flex-shrink-0">
+                    <img src="{{ asset('images/logo-rsud.avif') }}" alt="Logo RSUD Dr. H. Moch. Ansari Saleh" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h1 class="text-sm font-extrabold text-white leading-none">SIMONSIP <span class="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-normal">STARKES</span></h1>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Portal Dokter - SIMONSIP RSUD Dr. H. Moch. Ansari Saleh')</title>
+    <link rel="icon" type="image/avif" href="{{ asset('images/logo-rsud.avif') }}">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
@@ -26,8 +27,8 @@
             
             <!-- Logo & Title -->
             <a href="{{ route('dokter.dashboard') }}" class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                    RS
+                <div class="w-10 h-10 bg-white border border-slate-200 rounded-xl p-1 flex items-center justify-center shadow-sm shrink-0">
+                    <img src="{{ asset('images/logo-rsud.avif') }}" alt="Logo RSUD Dr. H. Moch. Ansari Saleh" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <span class="text-xs font-bold tracking-wider text-emerald-700 uppercase block">Portal Dokter</span>
