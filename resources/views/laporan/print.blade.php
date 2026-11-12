@@ -6,12 +6,110 @@
     <link rel="icon" type="image/avif" href="{{ asset('images/logo-rsud.avif') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @page {
+            size: A4 landscape; /* Memaksa ukuran kertas A4 Lanskap */
+            margin: 10mm;
+        }
         @media print {
             .no-print { display: none !important; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .print-sheet {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
         }
-        body { font-family: 'Times New Roman', Times, serif; }
-        .sans-table { font-family: Arial, Helvetica, sans-serif; }
+        body {
+            font-family: 'Calibri', 'Helvetica', Arial, sans-serif;
+            font-size: 10px; /* Ukuran font diperkecil sedikit agar pas */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .sans-table {
+            font-family: 'Calibri', 'Helvetica', Arial, sans-serif;
+        }
+        table {
+            width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed; /* Membatasi lebar kolom agar proporsional */
+        }
+        th, td {
+            padding: 6px 4px !important;
+            word-wrap: break-word; /* Mencegah teks panjang merusak tabel */
+            overflow-wrap: break-word;
+            overflow: hidden;
+            font-size: 10px !important;
+        }
+        @if($tab === 'kepatuhan')
+            /* Lebar spesifik 11 kolom Laporan Kepatuhan SIP (Total 100%) */
+            th:nth-child(1), td:nth-child(1) { width: 4%; }   /* No */
+            th:nth-child(2), td:nth-child(2) { width: 14%; }  /* Nama & Gelar */
+            th:nth-child(3), td:nth-child(3) { width: 10%; }  /* NIP/NIK */
+            th:nth-child(4), td:nth-child(4) { width: 13%; }  /* KSM & Spesialisasi */
+            th:nth-child(5), td:nth-child(5) { width: 12%; }  /* No. STR & Masa Berlaku */
+            th:nth-child(6), td:nth-child(6) { width: 13%; }  /* No. SIP */
+            th:nth-child(7), td:nth-child(7) { width: 6%; }   /* Praktik Ke- */
+            th:nth-child(8), td:nth-child(8) { width: 7%; }   /* Tgl Terbit */
+            th:nth-child(9), td:nth-child(9) { width: 7%; }   /* Tgl Kadaluarsa */
+            th:nth-child(10), td:nth-child(10) { width: 6%; } /* Sisa Hari */
+            th:nth-child(11), td:nth-child(11) { width: 8%; } /* Status Kepatuhan */
+        @elseif($tab === 'notifikasi')
+            /* Lebar spesifik 8 kolom Laporan Audit Notifikasi (Total 100%) */
+            th:nth-child(1), td:nth-child(1) { width: 4%; }
+            th:nth-child(2), td:nth-child(2) { width: 11%; }
+            th:nth-child(3), td:nth-child(3) { width: 14%; }
+            th:nth-child(4), td:nth-child(4) { width: 11%; }
+            th:nth-child(5), td:nth-child(5) { width: 12%; }
+            th:nth-child(6), td:nth-child(6) { width: 26%; }
+            th:nth-child(7), td:nth-child(7) { width: 11%; }
+            th:nth-child(8), td:nth-child(8) { width: 11%; }
+        @elseif($tab === 'verifikasi')
+            /* Lebar spesifik 8 kolom Laporan Verifikasi Berkas (Total 100%) */
+            th:nth-child(1), td:nth-child(1) { width: 4%; }
+            th:nth-child(2), td:nth-child(2) { width: 10%; }
+            th:nth-child(3), td:nth-child(3) { width: 10%; }
+            th:nth-child(4), td:nth-child(4) { width: 16%; }
+            th:nth-child(5), td:nth-child(5) { width: 16%; }
+            th:nth-child(6), td:nth-child(6) { width: 12%; }
+            th:nth-child(7), td:nth-child(7) { width: 12%; }
+            th:nth-child(8), td:nth-child(8) { width: 20%; }
+        @elseif($tab === 'histori')
+            /* Lebar spesifik 10 kolom Laporan Histori Pengajuan SIP (Total 100%) */
+            th:nth-child(1), td:nth-child(1) { width: 4%; }
+            th:nth-child(2), td:nth-child(2) { width: 14%; }
+            th:nth-child(3), td:nth-child(3) { width: 12%; }
+            th:nth-child(4), td:nth-child(4) { width: 9%; }
+            th:nth-child(5), td:nth-child(5) { width: 13%; }
+            th:nth-child(6), td:nth-child(6) { width: 6%; }
+            th:nth-child(7), td:nth-child(7) { width: 12%; }
+            th:nth-child(8), td:nth-child(8) { width: 8%; }
+            th:nth-child(9), td:nth-child(9) { width: 9%; }
+            th:nth-child(10), td:nth-child(10) { width: 13%; }
+        @elseif($tab === 'sla')
+            /* Lebar spesifik 12 kolom Laporan SLA SDM (Total 100%) */
+            th:nth-child(1), td:nth-child(1) { width: 4%; }
+            th:nth-child(2), td:nth-child(2) { width: 9%; }
+            th:nth-child(3), td:nth-child(3) { width: 12%; }
+            th:nth-child(4), td:nth-child(4) { width: 9%; }
+            th:nth-child(5), td:nth-child(5) { width: 11%; }
+            th:nth-child(6), td:nth-child(6) { width: 11%; }
+            th:nth-child(7), td:nth-child(7) { width: 5%; }
+            th:nth-child(8), td:nth-child(8) { width: 7%; }
+            th:nth-child(9), td:nth-child(9) { width: 7%; }
+            th:nth-child(10), td:nth-child(10) { width: 8%; }
+            th:nth-child(11), td:nth-child(11) { width: 9%; }
+            th:nth-child(12), td:nth-child(12) { width: 8%; }
+        @endif
     </style>
 </head>
 <body class="bg-slate-100 p-4 sm:p-8 text-slate-900">
@@ -32,11 +130,11 @@
     </div>
 
     <!-- Official Paper Sheet -->
-    <div class="max-w-6xl mx-auto bg-white p-8 sm:p-10 shadow-xl border border-slate-300">
+    <div class="print-sheet max-w-6xl mx-auto bg-white p-8 sm:p-10 shadow-xl border border-slate-300">
         <!-- KOP SURAT RESMI RSUD DR. H. MOCH. ANSARI SALEH -->
         <div class="border-b-4 border-double border-black pb-4 mb-6 flex items-center justify-between gap-4">
-            <div class="w-16 h-16 rounded-full border-2 border-slate-800 flex items-center justify-center font-bold text-xs text-center shrink-0 sans-table">
-                PEMPROV<br>KALSEL
+            <div class="w-16 h-16 flex items-center justify-center shrink-0">
+                <img src="{{ asset('images/logo-kalsel.png') }}" alt="Logo Provinsi Kalimantan Selatan" class="w-16 h-16 object-contain">
             </div>
             <div class="text-center flex-1">
                 <p class="text-sm font-bold uppercase tracking-widest">PEMERINTAH PROVINSI KALIMANTAN SELATAN</p>

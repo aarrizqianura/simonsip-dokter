@@ -120,9 +120,9 @@
     <!-- REPORT DOCUMENT CONTAINER -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <!-- Kop Resmi RSUD Preview Header -->
-        <div class="p-6 border-b-4 border-double border-slate-800 bg-slate-50/50 flex items-center justify-center gap-4">
-            <img src="{{ asset('images/logo-rsud.avif') }}" alt="Logo RSUD Dr. H. Moch. Ansari Saleh" class="w-14 h-14 object-contain shrink-0 hidden sm:block">
-            <div class="text-center">
+        <div class="p-6 border-b-4 border-double border-slate-800 bg-slate-50/50 flex items-center justify-between gap-4">
+            <img src="{{ asset('images/logo-kalsel.png') }}" alt="Logo Provinsi Kalimantan Selatan" class="w-14 h-14 object-contain shrink-0 hidden sm:block">
+            <div class="text-center flex-1">
                 <p class="text-xs font-bold uppercase tracking-widest text-slate-600">PEMERINTAH PROVINSI KALIMANTAN SELATAN</p>
                 <h2 class="text-lg sm:text-xl font-extrabold uppercase text-slate-900 tracking-wide">
                     RUMAH SAKIT UMUM DAERAH DR. H. MOCH. ANSARI SALEH BANJARMASIN
@@ -131,6 +131,7 @@
                     Jl. Brigjend H. Hasan Basry No. 1, Banjarmasin 70123 • Telp. (0511) 3301560 • Email: rsud.ansarisaleh@kalselprov.go.id
                 </p>
             </div>
+            <img src="{{ asset('images/logo-rsud.avif') }}" alt="Logo RSUD Dr. H. Moch. Ansari Saleh" class="w-14 h-14 object-contain shrink-0 hidden sm:block">
         </div>
 
         <!-- Report Title & KPI Summary Cards -->

@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 11px; }
+        table { border-collapse: collapse; width: 100%; font-family: 'Calibri', Arial, sans-serif; font-size: 11px; }
         th, td { border: 1px solid #334155; padding: 6px; vertical-align: top; }
         th { background-color: #e2e8f0; font-weight: bold; }
     </style>
